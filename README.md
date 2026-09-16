@@ -34,6 +34,29 @@ and, most importantly, the **Raid Omen level** (which decides the bonus wave, th
 level and the raiders' enchanted gear). The plugin only rewrites the duration of the Raid Omen effect
 so the 30 second countdown is not something you have to wait for.
 
+### Flow
+
+```mermaid
+flowchart TD
+    KILL["Player kills a raid captain<br/>outside of a raid"] --> BO["Plugin: hand out Bad Omen<br/>level = 1 + previous level, clamped 1..5, 120000 ticks"]
+    BO --> WALK["Player carries Bad Omen<br/>and walks into a village"]
+    WALK --> GATE{"Vanilla: non-peaceful difficulty,<br/>raids gamerule on,<br/>raid below its maximum level?"}
+    GATE -->|no| NOTHING["Nothing happens,<br/>Bad Omen stays on the player"]
+    NOTHING --> WALK
+    GATE -->|yes| CONV["Vanilla: Bad Omen becomes Raid Omen<br/>with the same level,<br/>position stored in raid_omen_position"]
+    CONV --> CUT["Plugin: rewrite the Raid Omen duration to<br/>trigger.raid-omen-ticks (default 2 ticks)"]
+    CUT --> TRIGGER["Vanilla: RaidOmenMobEffect calls<br/>Raids#createOrExtendRaid<br/>at the stored position"]
+    TRIGGER --> CENTRE["Vanilla: raid centre = centroid of the<br/>occupied village POIs within 64 blocks,<br/>RaidTriggerEvent is still fired"]
+    CENTRE --> SPAWN["Vanilla: raid ticks, the first wave spawns,<br/>RaidSpawnWaveEvent fires"]
+    SPAWN --> MOVE["Plugin: search again with the old ladder<br/>64 / 32 / centre, 20 attempts each<br/>and move the whole wave there,<br/>ravager riders get re-mounted"]
+    MOVE --> FIGHT["Vanilla: the wave fights on,<br/>further waves repeat the same loop<br/>with vanilla counts and levels"]
+    CUT -.->|kept, never reverted| LEVEL["Raid Omen level decides<br/>bonus wave, hero level,<br/>enchanted gear chance"]
+    MOVE -.->|waves only, nothing else| SPAWN
+```
+
+Every step marked `Plugin:` is the plugin; everything else is untouched vanilla code. The two dotted
+edges show what the plugin deliberately leaves alone.
+
 ---
 
 ## 2. Mechanics reference
@@ -125,7 +148,7 @@ so it changes the real-time duration without changing the number in the HUD:
 
 To read the truth instead of eyeballing a HUD timer:
 
-```
+```text
 /data get entity <player> active_effects
 ```
 
@@ -220,22 +243,30 @@ debug: false                # log raid triggers, per wave range hits and wave mo
 * Builds with Maven against `paper-api:26.2.build.124-stable` (JDK 25).
 * Loads, enables and registers `/oldraid` on a real **Paper 26.2 build 124** server
   (`Enabled - features: bad-omen-triggers-raid, captain-gives-bad-omen, old-spawn-positions`).
-* Live test on that server (server log, plugin debug on):
-
-  ```
-  Captain killed by Tagin_T -> Bad Omen 1
-  ...                                  -> Bad Omen 5      (stacking works)
-  Raid Omen countdown cut to 2 tick(s) for Tagin_T (level 5)   (conversion keeps the level)
-  Old spawn range factor 2 hit after 1 attempt(s) -> -1497 66 -2600
-  Moved 7 raiders (of 7 in the wave) to -1497 66 -2600          (waves land on the old position)
-  ... 8, 9, 12, 13, 15, 16, 17, 18 raiders on the following waves
-  ```
-
-  `data get entity Tagin_T active_effects` afterwards showed
-  `hero_of_the_village, amplifier: 4b` (level V raid in hard difficulty) and
-  `trial_omen, duration: 85873` (the level V trial omen, i.e. the 90000 tick tier).
 * In-game behaviour of a real raid farm (drop rates, farm throughput) is **not** verified here; that
   is what a test session is for.
+
+Live test on that server, with the plugin's debug output enabled:
+
+```text
+Captain killed by Tagin_T -> Bad Omen 1
+Captain killed by Tagin_T -> Bad Omen 2
+Captain killed by Tagin_T -> Bad Omen 3
+Captain killed by Tagin_T -> Bad Omen 4
+Captain killed by Tagin_T -> Bad Omen 5
+Raid Omen countdown cut to 2 tick(s) for Tagin_T (level 5)
+Old spawn range factor 2 hit after 1 attempt(s) -> -1497 66 -2600
+Moved 7 raiders (of 7 in the wave) to -1497 66 -2600
+later waves: 8, 9, 12, 13, 15, 16, 17, 18 raiders
+```
+
+That shows the three features in one run: Bad Omen stacks up to level 5, the Bad Omen to Raid Omen
+conversion keeps that level, and every wave is moved to the position the old search picked while the
+wave counts stay vanilla.
+
+`data get entity Tagin_T active_effects` after that run showed `hero_of_the_village, amplifier: 4b`
+(level V raid in hard difficulty) and `trial_omen, duration: 85873` (the level V trial omen, i.e. the
+90000 tick tier).
 
 ## 9. Sources
 
