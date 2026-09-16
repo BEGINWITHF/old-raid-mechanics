@@ -1,0 +1,43 @@
+# OldRaidMechanics - brings the pre-1.21.2 raid mechanics back to Paper 26.2.
+# Edit values here, then run /oldraid reload (or restart the server).
+
+enabled: true
+
+features:
+  # Vanilla converts Bad Omen into Raid Omen (30 seconds) when the player enters a village and only
+  # starts the raid when that countdown expires. This feature keeps the conversion (it is what carries
+  # the level over to the raid) and spends the countdown in the background, so the raid starts right
+  # away - see "trigger.raid-omen-ticks".
+  bad-omen-triggers-raid: true
+
+  # A raid captain killed by a player (or by the player's tamed wolf) gives Bad Omen
+  # directly, with the old stacking: level = 1 + previous level, clamped to 0..4,
+  # duration 100 minutes (120000 ticks).
+  captain-gives-bad-omen: true
+
+  # Also strip the Ominous Bottle from the captain's drops (a 1.21+ vanilla drop).
+  # false keeps the vanilla drop, so the plugin only changes the raid mechanics themselves.
+  remove-ominous-bottle-drop: false
+
+  # Move each freshly spawned raid wave to the position computed with the pre-1.21.2
+  # algorithm instead of leaving it where the 1.21.2+ shrinking-radius search put it.
+  old-spawn-positions: true
+
+trigger:
+  # Raid Omen duration used after the Bad Omen -> Raid Omen conversion, in ticks. Vanilla uses 600
+  # (30 seconds) before it starts the raid; 2 makes it start on the next tick. Never set below 2:
+  # the effect triggers on its last remaining tick, a 1 tick effect would expire before that.
+  raid-omen-ticks: 2
+
+spawn:
+  # Highest range of the pre-1.21.2 spawn search: 2 -> start at up to ~64 blocks from the raid
+  # centre, 1 -> start at ~32 blocks, 0 -> only the small area around the centre.
+  # The search always walks every lower range afterwards (64 -> 32 -> centre, 20 attempts each),
+  # which is the ladder 1.21.2 replaced with a countdown based range.
+  radius-factor: 2
+
+  # Ticks to wait before moving a wave, so the server can finish the vanilla spawn step.
+  teleport-delay-ticks: 1
+
+# Log extra information about raid triggering / wave moves.
+debug: false

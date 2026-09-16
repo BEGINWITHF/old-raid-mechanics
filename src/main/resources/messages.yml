@@ -1,0 +1,16 @@
+# Texts for /oldraid and the status lines.
+# Keys are read from the top level of this file; edit them freely and run /oldraid reload.
+prefix: "[OldRaid] "
+no-permission: "You do not have permission to do that."
+usage: "Usage: /oldraid <reload|status>"
+reloaded: "Reloaded: {features}"
+status-header: "OldRaidMechanics {version} - {state}"
+status-features: "Features: {features}"
+status-nms: "NMS bridge: {state}"
+status-config: "Spawn radius factor {radius}, teleport delay {delay} tick(s)"
+status-build: "Build: {build}"
+state-on: "enabled"
+state-off: "disabled"
+nms-ready: "ready"
+nms-unavailable: "unavailable ({error})"
+no-feature: "none"

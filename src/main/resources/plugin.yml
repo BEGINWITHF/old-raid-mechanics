@@ -1,0 +1,14 @@
+name: OldRaidMechanics
+version: '1.0.0'
+main: com.example.oldraids.OldRaidMechanicsPlugin
+api-version: '26.2'
+description: Reintroduces pre-1.21.2 raid mechanics (Bad Omen starts raids directly, raid captains give Bad Omen, raid waves spawn with the old algorithm).
+commands:
+  oldraid:
+    description: OldRaidMechanics admin command
+    usage: /oldraid <reload|status>
+    permission: oldraid.admin
+permissions:
+  oldraid.admin:
+    description: Allows using /oldraid
+    default: op

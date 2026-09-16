@@ -1,0 +1,3 @@
+# Keep the shell scripts LF so they stay runnable on Linux/macOS and in Git-Bash.
+* text=auto
+*.sh text eol=lf
