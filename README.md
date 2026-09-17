@@ -222,23 +222,7 @@ debug: false                # log raid triggers, per wave range hits and wave mo
   96², used by the captain rule). `/oldraid status` reports the NMS bridge state; if a future Paper
   build renames a member, only the affected feature stops working.
 
-## 7. Limits (read before testing a farm)
-
-* Vanilla still decides **whether** a wave spawns at all; if its own search finds nothing the wave
-  fails and this plugin cannot help. The plugin re-places a wave after it spawned, it does not inject
-  a position into the vanilla search.
-* The 1.21.2+ "spawn position within 96 blocks vertically of the village centre" rule still applies to
-  vanilla's own search, so a platform far above the village still needs the raid centre to be moved up
-  (the usual workstation/POI trick).
-* `remove-ominous-bottle-drop` defaults to `false`: the Ominous Bottle drop is vanilla, and by default
-  the plugin only changes the raid mechanics themselves.
-* Only patrol leaders that are not inside an active raid hand out Bad Omen. The additional check
-  "the captain is actually wearing the ominous banner" is not reproduced — the plain
-  `Raider#isPatrolLeader()` flag is used.
-* The plugin does not touch wave counts, raider counts, enchantment probabilities, the witch loot
-  table or the raid cancellation/celebration flow.
-
-## 8. Verified
+## 7. Verified
 
 * Builds with Maven against `paper-api:26.2.build.124-stable` (JDK 25).
 * Loads, enables and registers `/oldraid` on a real **Paper 26.2 build 124** server
@@ -268,7 +252,7 @@ wave counts stay vanilla.
 (level V raid in hard difficulty) and `trial_omen, duration: 85873` (the level V trial omen, i.e. the
 90000 tick tier).
 
-## 9. Sources
+## 8. Sources
 
 * Decompiled Paper 26.2 (build 124) classes this port is modelled on:
   `net.minecraft.world.effect.BadOmenMobEffect`, `net.minecraft.world.effect.RaidOmenMobEffect`,
